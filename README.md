@@ -118,10 +118,7 @@ O Git em si não possui login, mas é possível se autenticar em serviços de co
 	 Após isso crie uma pasta em seu diretório e clone seu projeto para dentro desta pasta. Faça as modificações que precisa e pode dar um:
 	 ```bash
 	 git push origin main
-```
----
-
-Com isso, você pode começar a usar o Git para gerenciar seus repositórios. Caso tenha dúvidas, posso ajudar com mais detalhes! 😊
+	```
 
 # Primeiro comando dentro da pasta depois de clonar
 
