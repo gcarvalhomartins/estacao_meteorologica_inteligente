@@ -1,11 +1,9 @@
-[[LINUX]]
-[[Sistema Operacional]]
-
 # PROJETO EMI ( ESTAÇÃO METEOROLOGICA INTELIGENTE )
 
 ### FLUXOGRAMA DO PROJETO
 
-![[Pasted image 20250218143754.png]]
+![Captura de tela 2025-02-18 143643](https://github.com/user-attachments/assets/2cbb9c78-8514-4324-96ac-709fb49674f9)
+
 
 O projeto foi idealizado para coletar temperatura e umidade do ambiente em que o raspiberry esta, utilizando o sensor ==DHT22==.
 
