@@ -165,7 +165,8 @@ Navegue até a pasta do projeto, ou o código e ative o ambiente virtual da maqu
 
 ###  **UTILIZANDO DHT22**
 
-==ATENÇÃO ==
+ATENÇÃO
+
 Só ira conseguir instalar todas as libs, caso seu ambiente .env, esteja ativado. Como no passo anterior. 
 
 Para o sensor **DHT22**, você pode usar a biblioteca **Adafruit_DHT**:
@@ -174,20 +175,20 @@ Para o sensor **DHT22**, você pode usar a biblioteca **Adafruit_DHT**:
     
     ```python
     pip3 install adafruit-circuitpython-dht
-	```
+    ```
 
-```bash
+	```bash
 	sudo apt install libgpiod2
 	para reconhecimento gpio do raspberri pi 3 
-```
+	```
 
-```python
-   pip install RPi.GPIO
-```
+	```python
+   	pip install RPi.GPIO
+	```
     
 - Código utilizado:
-    
-    ```python
+
+```python
 import time
 import requets
 import json
@@ -220,8 +221,7 @@ while True:
          dhtDevice.exit() 
          raise error 
     time.sleep(2.0)
-    ```
-    
+```
 
 ---
 
