@@ -1,6 +1,24 @@
-# PROJETO ESTAÇÃO METEOROLÓGICA COM RASPBERRI
+[[LINUX]]
+[[Sistema Operacional]]
 
-Para trabalhar com os sensores DHT22 e BMP280 no Raspberry Pi com Ubuntu Server 22, você pode utilizar as seguintes bibliotecas em Python:
+# PROJETO EMI ( ESTAÇÃO METEOROLOGICA INTELIGENTE )
+
+### FLUXOGRAMA DO PROJETO
+
+![[Pasted image 20250218143754.png]]
+
+O projeto foi idealizado para coletar temperatura e umidade do ambiente em que o raspiberry esta, utilizando o sensor ==DHT22==.
+
+Após a realização da coleta, ele ira mandar para a cloud, foi escolhido o SUPABASE, por ser de graça, até uma certa quantidade de dados, e principalmente pelo seu istant API, que é uma api que realiza o CRUD (CREATE, READ,DELETE E UPDATE), principal operação em aplicações.
+
+Com os dados recebidos através de uma requisição post, feita pelo raspiberry, populando nossa base de dados do supabase.
+
+A visualização desses dados será através do aplicativo mobile, criado em react native. Mostrando as últimas requisições feitas, ou seja um real time da temperatura e umidade do ambiente. 
+
+---
+# Configuração do Raspberry
+
+Para a configuração do raspberry foi utilizado o sistema operacional UBUNTU SERVER 22.04 LTS, abaixo esta todos os passos para a realização dessa configuração com o ubuntu server ja salvo no cartão sd do raspberry.
 
 Depencias linux para rodar o python 3:
 
@@ -10,7 +28,9 @@ sudo apt install python3-pip
 sudo apt install python3-venv
 ```
 
-Para ve os processos da maquina ocorrendo em tempo real
+### Comandos uteis para a utilização do ubuntu.
+
+Para vê os processos da maquina ocorrendo em tempo real
 
 ```bash
 sudo apt install btop para ver os status da maquina
@@ -21,7 +41,7 @@ para dividir a tela:
 tmux
 ```
 
-# Git e Git hub
+# Configuração do Git e Git hub
 
 Para instalar e configurar o Git no Ubuntu, siga os passos abaixo:
 
@@ -51,7 +71,7 @@ Para instalar e configurar o Git no Ubuntu, siga os passos abaixo:
 
 ---
 
-### **2. Configurar o Git**
+### **2. Configurar usuário do Git**
 
 1. Configure o nome de usuário global:
     
@@ -120,9 +140,15 @@ O Git em si não possui login, mas é possível se autenticar em serviços de co
 	 Após isso crie uma pasta em seu diretório e clone seu projeto para dentro desta pasta. Faça as modificações que precisa e pode dar um:
 	 ```bash
 	 git push origin main
-	```
+```
 
-# Primeiro comando dentro da pasta depois de clonar
+Com isso, você pode começar a usar o Git para gerenciar seus repositórios. Caso tenha dúvidas, posso ajudar com mais detalhes! 😊
+
+---
+
+# Ativando ambiente virtual dentro da pasta do projeto.
+
+Navegue até a pasta do projeto, ou o código e ative o ambiente virtual da maquina ubuntu.
 
   1. Para criar o ambiente virtual
   ```
@@ -139,107 +165,104 @@ O Git em si não possui login, mas é possível se autenticar em serviços de co
    deactivate 
 ```
 
-   
-  ==preciso criar um requeriments.txt dentro do env==    
-   e depois dar o comando pip install -r /caminho ate o requirements.txt
-### 1. **DHT22**
+---
+
+###  **UTILIZANDO DHT22**
+
+==ATENÇÃO ==
+Só ira conseguir instalar todas as libs, caso seu ambiente .env, esteja ativado. Como no passo anterior. 
 
 Para o sensor **DHT22**, você pode usar a biblioteca **Adafruit_DHT**:
 
-- Instale as dependencias dos pacotes:
+- Instale as dependências dos pacotes:
     
-    ```bash
-    sudo apt update
+    ```python
+    pip3 install adafruit-circuitpython-dht
+	```
+
+```bash
 	sudo apt install libgpiod2
-    ```
+	para reconhecimento gpio do raspberri pi 3 
+```
+
+```python
+   pip install RPi.GPIO
+```
     
-- Instale com o comando dentro da pasta do diretorio do projeto:
-    
-    ```bash
-    pip install adafruit-circuitpython-dht
-    ```
-    
-- Código de exemplo:
+- Código utilizado:
     
     ```python
-    import adafruit_dht
-	import board
-	
-	# Configuração do pino (use o número do GPIO)
-	dht_device = adafruit_dht.DHT22(board.D4)
-	
-	try:
-	    temperature = dht_device.temperature
-	    humidity = dht_device.humidity
-	    print(f"Temperatura: {temperature:.2f} °C")
-	    print(f"Umidade: {humidity:.2f} %")
-	except RuntimeError as e:
-	    print(f"Erro ao ler o sensor: {e}")
+import time
+import requets
+import json
+import board 
+import adafruit_dht
 
+url = 'https://yoeergerojrgfphyxavb.supabase.co/rest/v1/receive_dados'
+
+dhtDevice = adafruit_dht.DHT22(board.D18)
+
+while True: 
+	try: 
+        temperature_c = dhtDevice.temperature 
+        temperature_f = temperature_c * (9 / 5) + 32
+        humidity = dhtDevice.humidity 
+        obj_sensor = {
+	        'temperatura': temperature_c,
+	        'umidade' : humidity
+        }
+        headers = {
+	        "apikey": "<seu token aqui>" ,
+	        "Autorization": "<Bearer seu token aqui>" 
+        }
+        send_data = requests.post(url,json = obj_sensor , headers = headers )
+        print(send_data) 
+    except RuntimeError as error:
+         print(error.args[0]) 
+         time.sleep(2.0) 
+    continue except Exception as error: 
+         dhtDevice.exit() 
+         raise error 
+    time.sleep(2.0)
     ```
     
 
 ---
 
-### 2. **BMP280**
+# Documentação oficial da Adafruit
 
-Para o sensor **BMP280**, você pode usar a biblioteca **Adafruit-BMP280** ou **smbus2**:
+Para realização de sucesso em todo o desenvolvimento do código, foi seguida essa documentação da própria comunidade do adafruit, aqui esta o link:
 
-- Instale com o comando:
-    
-    ```bash
-    pip install adafruit-circuitpython-bmp280
-    ```
-    
-- Código de exemplo usando Adafruit-BMP280:
-    
-    ```python
-    import board
-    import adafruit_bmp280
-    
-    # Configuração do sensor (I2C)
-    i2c = board.I2C()  # Cria o objeto I2C
-    bmp280 = adafruit_bmp280.Adafruit_BMP280_I2C(i2c)
-    
-    # Ajustes opcionais
-    bmp280.sea_level_pressure = 1013.25  # Pressão ao nível do mar (hPa)
-    
-    # Leitura dos dados
-    print(f"Temperatura: {bmp280.temperature:.2f} °C")
-    print(f"Pressão: {bmp280.pressure:.2f} hPa")
-    print(f"Altitude: {bmp280.altitude:.2f} m")
-
-	
-    ```
-    
+```
+https://cdn-learn.adafruit.com/downloads/pdf/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging.pdf
+```
 
 ---
 
-### Configuração do Raspberry Pi com Ubuntu Server
+# Conectando a Cloud Supabase
 
-1. **Ativar I2C e GPIO**:
-    
-    - Certifique-se de que os módulos I2C e GPIO estão ativados no sistema.
-    - Adicione o seguinte ao arquivo `/boot/firmware/config.txt` (se não estiver presente):
-        
-        ```txt
-        dtparam=i2c_arm=on
-        dtparam=spi=on
-        dtparam=audio=on
-        ```
-        
-    - Reinicie o Raspberry Pi.
-2. **Instalar dependências**:
-    
-    - Certifique-se de ter os pacotes necessários instalados:
-        
-        ```bash
-        sudo apt update
-        sudo apt install python3-pip python3-smbus python3-dev i2c-tools
-        ```
-        
-3. **Testar os dispositivos**:
-    
-    - Use o comando `i2cdetect -y 1` para verificar se os sensores estão sendo detectados no barramento I2C.
+### O que é o Supabase ?
 
-Essas bibliotecas são fáceis de usar e amplamente suportadas para o Raspberry Pi.
+O Supabase é uma plataforma de código aberto que oferece serviços de banco de dados, autenticação, armazenamento de arquivos e funções sem servidor.
+
+### O que foi realizado dentro do supabase ?
+
+Foi criado uma tabela chamada receive_dados, com as colunas id,temperatura,umidade,created_at
+
+id = identificacao da requisicao mandada pelo raspiberry.
+temperatura = tempearatura do ambiente coletada pelo sensor.
+umidade = umidade do ambiente coletada pelo sensor. 
+
+O supabase oferece uma funcionalidade chamada istante API, que para cada tabela que e criada dentro do database, ele cria automaticamente uma API, com as funcionalidades de CRUD (CREATE,READ,UPDATE,DELETE).
+
+estaremos utilizando apenas a rota de post no nosso caso em especifico.
+
+Aqui esta um curl da tabela.
+
+```bash
+curl 'https://yoeergerojrgfphyxavb.supabase.co/rest/v1/receive_dados' \
+-H "apikey: <seu token aqui>" \
+-H "Authorization: Bearer <seu token aqui>          
+```
+
+---
